@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "cnmentor.moodle.url",
+      "type": "java.lang.String",
+      "description": "CN Moodle url."
+    },
+    {
+      "name": "cnmentor.moodle.username",
+      "type": "java.lang.String",
+      "description": "CN Moodle username."
+    },
+    {
+      "name": "cnmentor.moodle.password",
+      "type": "java.lang.String",
+      "description": "CN Moodle password."
+    },
+    {
+      "name": "cnmentor.mongo.url",
+      "type": "java.lang.String",
+      "description": "CN Mentor Mongo connection URL."
+    }
+  ]
+}
