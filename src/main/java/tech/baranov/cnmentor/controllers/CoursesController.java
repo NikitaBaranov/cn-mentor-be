@@ -8,8 +8,8 @@ import tech.baranov.cnmentor.services.CourseService;
 import java.util.List;
 
 @RestController
-//@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class CoursesController {
 
     private final CourseService courseService;

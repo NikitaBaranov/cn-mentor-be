@@ -1,5 +1,6 @@
 package tech.baranov.cnmentor.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import tech.baranov.cnmentor.models.Student;
 import tech.baranov.cnmentor.services.StudentService;
@@ -7,14 +8,11 @@ import tech.baranov.cnmentor.services.StudentService;
 import java.util.List;
 
 @RestController
-//@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class StudentsController {
 
     private final StudentService studentService;
-
-    public StudentsController(StudentService studentService) {
-        this.studentService = studentService;
-    }
 
     @GetMapping("/students")
     public List<Student> getAll() {
@@ -42,7 +40,7 @@ public class StudentsController {
         return studentService.create(students);
     }
 
-    @CrossOrigin(origins = "*")
+//    @CrossOrigin(origins = "*")
     @DeleteMapping("/students/{id}")
     public void delete(@PathVariable Integer id) {
         studentService.delete(id);
