@@ -2,6 +2,7 @@ package tech.baranov.cnmentor.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import tech.baranov.cnmentor.models.GitHubEvent;
 import tech.baranov.cnmentor.models.Student;
 import tech.baranov.cnmentor.services.StudentService;
 
@@ -24,23 +25,31 @@ public class StudentsController {
         return studentService.get(id);
     }
 
+    @GetMapping("/students/{id}/gitHubEvents")
+    public List<GitHubEvent> getGitHubEvents(@PathVariable Integer id) {
+        return studentService.getStudentGitHubEvents(id);
+    }
+
     @GetMapping("/students/update")
     public List<Student> update() {
         return studentService.updateAll();
     }
 
     @GetMapping("/students/{studentId}/update/course/{courseId}")
-    public Student update(@PathVariable Integer studentId,
-                          @PathVariable Integer courseId) {
+    public Student update(@PathVariable Integer studentId, @PathVariable Integer courseId) {
         return studentService.update(studentId, courseId);
     }
 
     @PostMapping("/students")
-    public List<Student> create(@RequestBody List<Student> students) {
+    public Student create(@RequestBody Student students) {
         return studentService.create(students);
     }
 
-//    @CrossOrigin(origins = "*")
+    @PutMapping("/students")
+    public Student edit(@RequestBody Student students) {
+        return studentService.edit(students);
+    }
+
     @DeleteMapping("/students/{id}")
     public void delete(@PathVariable Integer id) {
         studentService.delete(id);

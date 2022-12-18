@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import tech.baranov.cnmentor.exceptions.StudentNotFoundException;
 import tech.baranov.cnmentor.models.Course;
+import tech.baranov.cnmentor.models.GitHubEvent;
 import tech.baranov.cnmentor.models.Progress;
 import tech.baranov.cnmentor.models.Student;
 import tech.baranov.cnmentor.repositories.StudentsRepository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -22,6 +24,7 @@ public class StudentService {
     private final StudentsRepository studentsRepository;
 
     private final CourseService courseService;
+    private final GitHubService gitHubService;
     private final OutlineReportService outlineReportService;
 
     public List<Student> getAll() {
@@ -32,12 +35,25 @@ public class StudentService {
         return studentsRepository.findById(id).orElseThrow(StudentNotFoundException::new);
     }
 
-    public List<Student> create(List<Student> students) {
-        for (Student student : students) {
-            student.setCoursesProgress(new HashMap<>());
-            studentsRepository.insert(student);
+    public List<GitHubEvent> getStudentGitHubEvents(Integer id) {
+        if (get(id).getGitHubUser() == null) {
+            return new ArrayList<>();
         }
-        return getAll();
+        return gitHubService.getStudentEvents(get(id).getGitHubUser().getId());
+    }
+
+    public Student create(Student student) {
+        student.setCoursesProgress(new HashMap<>());
+        student.setGitHubUser(gitHubService.fetchUser(student.getGutHubUserName()));
+        student.setGitHubRepos(gitHubService.fetchRepos(student.getGutHubUserName()));
+        return studentsRepository.insert(student);
+    }
+
+    public Student edit(Student student) {
+        student.setGitHubUser(gitHubService.fetchUser(student.getGutHubUserName()));
+        student.setGitHubRepos(gitHubService.fetchRepos(student.getGutHubUserName()));
+
+        return studentsRepository.save(student);
     }
 
     public List<Student> updateAll() {
@@ -46,22 +62,29 @@ public class StudentService {
         List<Course> courses = courseService.getAll();
 
         log.info("create futures");
-        List<CompletableFuture<Student>> completableFutures = studentsRepository.findAll().stream()
+        List<CompletableFuture<Student>> updateCN = studentsRepository.findAll().stream()
                 .map(student -> courses.stream()
                         .map(course -> CompletableFuture.supplyAsync(() -> update(student, course.getId())))
                         .collect(Collectors.toList()))
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 
-
         log.info("join futures");
-        completableFutures.forEach(CompletableFuture::join);
+        updateCN.forEach(CompletableFuture::join);
+
+        studentsRepository.findAll().forEach(student -> {
+            student.setGitHubUser(gitHubService.fetchUser(student.getGutHubUserName()));
+            student.setGitHubRepos(gitHubService.fetchRepos(student.getGutHubUserName()));
+            studentsRepository.save(student);
+
+            gitHubService.updateGitHubEvents(student.getGutHubUserName());
+        });
 
         return getAll();
     }
 
     public Student update(Integer studentId, Integer courseId) {
-        Student student = studentsRepository.findById(studentId).orElse(null);
+        Student student = studentsRepository.findById(studentId).orElseThrow(StudentNotFoundException::new);
         return update(student, courseId);
     }
 
@@ -74,7 +97,13 @@ public class StudentService {
 
         student.getCoursesProgress().put(courseId, progress);
 
+        student.setGitHubUser(gitHubService.fetchUser(student.getGutHubUserName()));
+        student.setGitHubRepos(gitHubService.fetchRepos(student.getGutHubUserName()));
+
         studentsRepository.save(student);
+
+        gitHubService.updateGitHubEvents(student.getGutHubUserName());
+
         return student;
     }
 

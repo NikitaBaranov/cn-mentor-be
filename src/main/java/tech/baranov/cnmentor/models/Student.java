@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -15,6 +16,11 @@ public class Student {
     private final Integer id;
 
     private final String name;
+
+    private final String gutHubUserName;
+    private GitHubUser gitHubUser;
+    private List<GitHubRepo> gitHubRepos;
+
     private final LocalDateTime start;
     private final LocalDateTime end;
 
