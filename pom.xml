@@ -65,7 +65,7 @@
                         </exclude>
                     </excludes>
                     <image>
-                        <name>nikitabaranov/cn-mentor:${project.version}</name>
+                        <name>nikitabaranov/cn-mentor-be:${project.version}</name>
                     </image>
                 </configuration>
             </plugin>
